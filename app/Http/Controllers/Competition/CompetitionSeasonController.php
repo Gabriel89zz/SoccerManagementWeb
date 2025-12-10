@@ -19,15 +19,15 @@ class CompetitionSeasonController extends Controller
         // BÚSQUEDA AJAX
         if ($request->filled('search')) {
             $search = $request->search;
-            $query->where(function($q) use ($search) {
+            $query->where(function ($q) use ($search) {
                 // Buscar por nombre de la competición
-                $q->whereHas('competition', function($sq) use ($search) {
+                $q->whereHas('competition', function ($sq) use ($search) {
                     $sq->where('name', 'like', '%' . $search . '%');
                 })
-                // O por nombre de la temporada
-                ->orWhereHas('season', function($sq) use ($search) {
-                    $sq->where('name', 'like', '%' . $search . '%');
-                });
+                    // O por nombre de la temporada
+                    ->orWhereHas('season', function ($sq) use ($search) {
+                        $sq->where('name', 'like', '%' . $search . '%');
+                    });
             });
         }
 
@@ -43,7 +43,7 @@ class CompetitionSeasonController extends Controller
         $competitions = Competition::where('is_active', 1)->orderBy('name')->get();
         // Ordenamos temporadas descendente (más reciente primero)
         $seasons = Season::where('is_active', 1)->orderBy('name', 'desc')->get();
-        
+
         return view('competition.competition_seasons.create', compact('competitions', 'seasons'));
     }
 
@@ -57,9 +57,9 @@ class CompetitionSeasonController extends Controller
 
         // Opcional: Validar duplicados (misma comp + misma season)
         $exists = CompetitionSeason::where('competition_id', $request->competition_id)
-                                   ->where('season_id', $request->season_id)
-                                   ->exists();
-        
+            ->where('season_id', $request->season_id)
+            ->exists();
+
         if ($exists) {
             return back()->withErrors(['msg' => 'This competition is already assigned to this season.'])->withInput();
         }
@@ -79,7 +79,7 @@ class CompetitionSeasonController extends Controller
     public function edit($id)
     {
         $competitionSeason = CompetitionSeason::findOrFail($id);
-        
+
         $competitions = Competition::where('is_active', 1)->orderBy('name')->get();
         $seasons = Season::where('is_active', 1)->orderBy('name', 'desc')->get();
 
@@ -96,9 +96,9 @@ class CompetitionSeasonController extends Controller
 
         // Validar duplicados excluyendo el actual
         $exists = CompetitionSeason::where('competition_id', $request->competition_id)
-                                   ->where('season_id', $request->season_id)
-                                   ->where('competition_season_id', '!=', $id)
-                                   ->exists();
+            ->where('season_id', $request->season_id)
+            ->where('competition_season_id', '!=', $id)
+            ->exists();
 
         if ($exists) {
             return back()->withErrors(['msg' => 'This competition is already assigned to this season.'])->withInput();

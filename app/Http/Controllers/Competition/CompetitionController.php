@@ -20,21 +20,21 @@ class CompetitionController extends Controller
         // BÚSQUEDA AJAX
         if ($request->filled('search')) {
             $search = $request->search;
-            $query->where(function($q) use ($search) {
+            $query->where(function ($q) use ($search) {
                 // Nombre
                 $q->where('name', 'like', '%' . $search . '%')
-                  // Buscar por Tipo
-                  ->orWhereHas('type', function($sq) use ($search) {
-                      $sq->where('type_name', 'like', '%' . $search . '%'); // Usa 'type_name' si ese es el campo
-                  })
-                  // Buscar por País
-                  ->orWhereHas('country', function($sq) use ($search) {
-                      $sq->where('name', 'like', '%' . $search . '%');
-                  })
-                  // Buscar por Confederación
-                  ->orWhereHas('confederation', function($sq) use ($search) {
-                      $sq->where('name', 'like', '%' . $search . '%');
-                  });
+                    // Buscar por Tipo
+                    ->orWhereHas('type', function ($sq) use ($search) {
+                        $sq->where('type_name', 'like', '%' . $search . '%'); // Usa 'type_name' si ese es el campo
+                    })
+                    // Buscar por País
+                    ->orWhereHas('country', function ($sq) use ($search) {
+                        $sq->where('name', 'like', '%' . $search . '%');
+                    })
+                    // Buscar por Confederación
+                    ->orWhereHas('confederation', function ($sq) use ($search) {
+                        $sq->where('name', 'like', '%' . $search . '%');
+                    });
             });
         }
 
@@ -47,11 +47,10 @@ class CompetitionController extends Controller
     // 2. CREATE FORM
     public function create()
     {
-        // CORRIGE AQUÍ TAMBIÉN: usa 'type_name' en lugar de 'name' para orderBy
         $types = CompetitionType::where('is_active', 1)->orderBy('type_name')->get();
         $countries = Country::where('is_active', 1)->orderBy('name')->get();
         $confederations = Confederation::where('is_active', 1)->orderBy('name')->get();
-        
+
         return view('competition.competitions.create', compact('types', 'countries', 'confederations'));
     }
 
@@ -80,8 +79,7 @@ class CompetitionController extends Controller
     public function edit($id)
     {
         $competition = Competition::findOrFail($id);
-        
-        // CORRIGE AQUÍ TAMBIÉN: usa 'type_name' en lugar de 'name' para orderBy
+
         $types = CompetitionType::where('is_active', 1)->orderBy('type_name')->get();
         $countries = Country::where('is_active', 1)->orderBy('name')->get();
         $confederations = Confederation::where('is_active', 1)->orderBy('name')->get();
@@ -93,7 +91,7 @@ class CompetitionController extends Controller
     public function update(Request $request, $id)
     {
         $validated = $request->validate([
-            'name' => 'required|max:150|unique:competition,name,'.$id.',competition_id',
+            'name' => 'required|max:150|unique:competition,name,' . $id . ',competition_id',
             'competition_type_id' => 'required|exists:competition_type,type_id', // CAMBIA: competition_type_id → type_id
             'country_id' => 'nullable|exists:country,country_id',
             'confederation_id' => 'nullable|exists:confederation,confederation_id',

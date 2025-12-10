@@ -18,25 +18,25 @@ class CompetitionStageController extends Controller
         // BÚSQUEDA AJAX
         if ($request->filled('search')) {
             $search = $request->search;
-            $query->where(function($q) use ($search) {
+            $query->where(function ($q) use ($search) {
                 // Buscar por nombre de la fase
                 $q->where('name', 'like', '%' . $search . '%')
-                  // O por nombre de la competición
-                  ->orWhereHas('competitionSeason.competition', function($sq) use ($search) {
-                      $sq->where('name', 'like', '%' . $search . '%');
-                  })
-                  // O por nombre de la temporada
-                  ->orWhereHas('competitionSeason.season', function($sq) use ($search) {
-                      $sq->where('name', 'like', '%' . $search . '%');
-                  });
+                    // O por nombre de la competición
+                    ->orWhereHas('competitionSeason.competition', function ($sq) use ($search) {
+                        $sq->where('name', 'like', '%' . $search . '%');
+                    })
+                    // O por nombre de la temporada
+                    ->orWhereHas('competitionSeason.season', function ($sq) use ($search) {
+                        $sq->where('name', 'like', '%' . $search . '%');
+                    });
             });
         }
 
         // Ordenamos por Temporada y luego por Orden de Fase
         $stages = $query->orderBy('competition_season_id', 'desc')
-                        ->orderBy('stage_order', 'asc')
-                        ->paginate(10);
-                        
+            ->orderBy('stage_order', 'asc')
+            ->paginate(10);
+
         $stages->appends(['search' => $request->search]);
 
         return view('competition.competition_stages.index', compact('stages'));
@@ -47,9 +47,9 @@ class CompetitionStageController extends Controller
     {
         // Cargar CompetitionSeasons para el dropdown
         $compSeasons = CompetitionSeason::with(['competition', 'season'])
-                                        ->where('is_active', 1)
-                                        ->get();
-        
+            ->where('is_active', 1)
+            ->get();
+
         return view('competition.competition_stages.create', compact('compSeasons'));
     }
 
@@ -69,7 +69,6 @@ class CompetitionStageController extends Controller
     // 4. SHOW DETAIL
     public function show($id)
     {
-        // Cargamos relaciones profundas
         $stage = CompetitionStage::with(['competitionSeason.competition', 'competitionSeason.season'])->findOrFail($id);
         return view('competition.competition_stages.show', compact('stage'));
     }
@@ -78,10 +77,10 @@ class CompetitionStageController extends Controller
     public function edit($id)
     {
         $stage = CompetitionStage::findOrFail($id);
-        
+
         $compSeasons = CompetitionSeason::with(['competition', 'season'])
-                                        ->where('is_active', 1)
-                                        ->get();
+            ->where('is_active', 1)
+            ->get();
 
         return view('competition.competition_stages.edit', compact('stage', 'compSeasons'));
     }

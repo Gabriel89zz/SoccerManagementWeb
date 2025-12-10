@@ -19,19 +19,19 @@ class CompetitionSeasonTeamController extends Controller
         // BÚSQUEDA AJAX
         if ($request->filled('search')) {
             $search = $request->search;
-            $query->where(function($q) use ($search) {
+            $query->where(function ($q) use ($search) {
                 // Buscar por nombre del equipo
-                $q->whereHas('team', function($sq) use ($search) {
+                $q->whereHas('team', function ($sq) use ($search) {
                     $sq->where('name', 'like', '%' . $search . '%');
                 })
-                // O por nombre de la competición
-                ->orWhereHas('competitionSeason.competition', function($sq) use ($search) {
-                    $sq->where('name', 'like', '%' . $search . '%');
-                })
-                // O por nombre de la temporada
-                ->orWhereHas('competitionSeason.season', function($sq) use ($search) {
-                    $sq->where('name', 'like', '%' . $search . '%');
-                });
+                    // O por nombre de la competición
+                    ->orWhereHas('competitionSeason.competition', function ($sq) use ($search) {
+                        $sq->where('name', 'like', '%' . $search . '%');
+                    })
+                    // O por nombre de la temporada
+                    ->orWhereHas('competitionSeason.season', function ($sq) use ($search) {
+                        $sq->where('name', 'like', '%' . $search . '%');
+                    });
             });
         }
 
@@ -46,14 +46,11 @@ class CompetitionSeasonTeamController extends Controller
     {
         // Cargar CompetitionSeasons con relaciones para el dropdown "Competición - Temporada"
         $compSeasons = CompetitionSeason::with(['competition', 'season'])
-                                        ->where('is_active', 1)
-                                        ->get();
-        
-        // Formatear para el select (esto podría hacerse en la vista, pero aquí queda limpio)
-        // No es necesario modificar la colección, lo haremos en el blade.
+            ->where('is_active', 1)
+            ->get();
 
         $teams = Team::where('is_active', 1)->orderBy('name')->get();
-        
+
         return view('competition.competition_season_teams.create', compact('compSeasons', 'teams'));
     }
 
@@ -69,8 +66,8 @@ class CompetitionSeasonTeamController extends Controller
 
         // Validar duplicados (mismo equipo en la misma temporada de competición)
         $exists = CompetitionSeasonTeam::where('competition_season_id', $request->competition_season_id)
-                                       ->where('team_id', $request->team_id)
-                                       ->exists();
+            ->where('team_id', $request->team_id)
+            ->exists();
 
         if ($exists) {
             return back()->withErrors(['msg' => 'This team is already registered in this competition season.'])->withInput();
@@ -91,10 +88,10 @@ class CompetitionSeasonTeamController extends Controller
     public function edit($id)
     {
         $participation = CompetitionSeasonTeam::findOrFail($id);
-        
+
         $compSeasons = CompetitionSeason::with(['competition', 'season'])
-                                        ->where('is_active', 1)
-                                        ->get();
+            ->where('is_active', 1)
+            ->get();
 
         $teams = Team::where('is_active', 1)->orderBy('name')->get();
 
@@ -113,9 +110,9 @@ class CompetitionSeasonTeamController extends Controller
 
         // Validar duplicados excluyendo el actual
         $exists = CompetitionSeasonTeam::where('competition_season_id', $request->competition_season_id)
-                                       ->where('team_id', $request->team_id)
-                                       ->where('competition_season_team_id', '!=', $id)
-                                       ->exists();
+            ->where('team_id', $request->team_id)
+            ->where('competition_season_team_id', '!=', $id)
+            ->exists();
 
         if ($exists) {
             return back()->withErrors(['msg' => 'This team is already registered in this competition season.'])->withInput();

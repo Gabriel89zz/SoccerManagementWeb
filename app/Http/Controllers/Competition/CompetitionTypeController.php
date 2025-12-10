@@ -37,7 +37,6 @@ class CompetitionTypeController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            // La columna es 'type_name'
             'type_name' => 'required|max:100|unique:competition_type,type_name',
         ]);
 
@@ -63,8 +62,7 @@ class CompetitionTypeController extends Controller
     public function update(Request $request, $id)
     {
         $validated = $request->validate([
-            // Validamos unique ignorando el ID actual (type_id)
-            'type_name' => 'required|max:100|unique:competition_type,type_name,'.$id.',type_id',
+            'type_name' => 'required|max:100|unique:competition_type,type_name,' . $id . ',type_id',
         ]);
 
         $type = CompetitionType::findOrFail($id);

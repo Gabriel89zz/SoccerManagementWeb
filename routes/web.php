@@ -6,7 +6,6 @@ use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Core\UserController;
 use App\Http\Controllers\DashboardController;
 
-
 use App\Http\Controllers\Organization\TeamController;
 use App\Http\Controllers\Core\CountryController;
 use App\Http\Controllers\Core\CityController;
@@ -91,7 +90,7 @@ Route::post('/register', [RegisterController::class, 'register']);
 
 // 3. Rutas Protegidas (Solo requieren estar logueado)
 Route::middleware('auth')->group(function () {
-    
+
     // Dashboard General
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     // --- MÓDULO ORGANIZATION ---
@@ -105,7 +104,6 @@ Route::middleware('auth')->group(function () {
     Route::resource('team-social-medias', TeamSocialMediaController::class);
     Route::resource('team-sponsorships', TeamSponsorshipController::class);
     Route::resource('sponsors', SponsorController::class);
-
     Route::get('/api/cities', [App\Http\Controllers\Core\CityController::class, 'search'])->name('api.cities');
 
     // --- MÓDULO CORE ---
@@ -127,7 +125,7 @@ Route::middleware('auth')->group(function () {
     Route::resource('referees', RefereeController::class);
     Route::resource('scouts', ScoutController::class);
     Route::resource('staff-members', StaffMemberController::class);
-    
+
     // --- MÓDULO COMPETITION ---
     Route::resource('competitions', CompetitionController::class);
     Route::resource('competition-seasons', CompetitionSeasonController::class);
@@ -158,7 +156,6 @@ Route::middleware('auth')->group(function () {
     Route::resource('shots', ShotController::class);
     Route::resource('substitutions', SubstitutionController::class);
     Route::resource('match-lineups', MatchLineupController::class);
-    // Rutas para búsqueda AJAX de jugadores
     Route::get('/api/players/search', [LineupPlayerController::class, 'searchPlayers'])->name('api.players.search');
 
 
@@ -171,72 +168,67 @@ Route::middleware('auth')->group(function () {
     Route::resource('team-match-stats', TeamMatchStatController::class);
 
 
+    Route::get('/api/goals/players/search', [GoalController::class, 'searchPlayers'])->name('api.goals.players.search');
+    
+    Route::get('/api/goals/players/by-team', [GoalController::class, 'searchPlayersByTeam'])->name('api.goals.players.by-team');
 
-    // Rutas para búsqueda AJAX de jugadores (si ya tienes una, puedes reutilizarla)
-Route::get('/api/goals/players/search', [GoalController::class, 'searchPlayers'])->name('api.goals.players.search');
-// Ruta opcional para filtrar por equipo
-Route::get('/api/goals/players/by-team', [GoalController::class, 'searchPlayersByTeam'])->name('api.goals.players.by-team');
+    Route::get('/api/cards/players/search', [\App\Http\Controllers\MatchDay\CardController::class, 'searchPlayers'])->name('api.cards.players.search');
 
-Route::get('/api/cards/players/search', [\App\Http\Controllers\MatchDay\CardController::class, 'searchPlayers'])->name('api.cards.players.search');
+    Route::get('/api/fouls/players/search', [FoulController::class, 'searchPlayers'])->name('api.fouls.players.search');
 
-Route::get('/api/fouls/players/search', [FoulController::class, 'searchPlayers'])->name('api.fouls.players.search');
+    Route::get('/api/players/search', [\App\Http\Controllers\People\PlayerController::class, 'searchPlayers'])
+        ->name('api.players.search');
 
-    // Ruta general para búsqueda de jugadores (reutilizable)
-Route::get('/api/players/search', [\App\Http\Controllers\People\PlayerController::class, 'searchPlayers'])
-    ->name('api.players.search');
+    Route::get('/api/shots/players/search', [ShotController::class, 'searchPlayers'])
+        ->name('api.shots.players.search');
 
-// Rutas para búsqueda AJAX de jugadores (para Shots)
-Route::get('/api/shots/players/search', [ShotController::class, 'searchPlayers'])
-    ->name('api.shots.players.search');
+    Route::get('/api/substitutions/players/search', [SubstitutionController::class, 'searchPlayers'])
+        ->name('api.substitutions.players.search');
 
-Route::get('/api/substitutions/players/search', [SubstitutionController::class, 'searchPlayers'])
-    ->name('api.substitutions.players.search');
-
-Route::get('/api/match-events/players/search', [MatchEventController::class, 'searchPlayers'])
-    ->name('api.match-events.players.search');
+    Route::get('/api/match-events/players/search', [MatchEventController::class, 'searchPlayers'])
+        ->name('api.match-events.players.search');
 
     Route::get('/api/match-lineups/matches/search', [MatchLineupController::class, 'searchMatches'])->name('api.match-lineups.matches.search');
-Route::get('/api/match-lineups/match/{id}', [MatchLineupController::class, 'getMatchInfo'])->name('api.match-lineups.match.info');
+    Route::get('/api/match-lineups/match/{id}', [MatchLineupController::class, 'getMatchInfo'])->name('api.match-lineups.match.info');
 
-Route::get('/api/lineups/search', [LineupPlayerController::class, 'searchLineups'])->name('api.lineups.search');
+    Route::get('/api/lineups/search', [LineupPlayerController::class, 'searchLineups'])->name('api.lineups.search');
 
-Route::get('/api/matches/search', [App\Http\Controllers\MatchDay\GoalController::class, 'searchMatches'])->name('api.matches.search');
+    Route::get('/api/matches/search', [App\Http\Controllers\MatchDay\GoalController::class, 'searchMatches'])->name('api.matches.search');
 
-Route::get('/api/cards/matches/search', [App\Http\Controllers\MatchDay\CardController::class, 'searchMatches'])->name('api.cards.matches.search');
-Route::get('/api/fouls/matches/search', [App\Http\Controllers\MatchDay\FoulController::class, 'searchMatches'])->name('api.fouls.matches.search');
-Route::get('/api/shots/matches/search', [App\Http\Controllers\MatchDay\ShotController::class, 'searchMatches'])->name('api.shots.matches.search');
-Route::get('/api/substitutions/matches/search', [App\Http\Controllers\MatchDay\SubstitutionController::class, 'searchMatches'])->name('api.substitutions.matches.search');
-Route::get('/api/match-events/matches/search', [App\Http\Controllers\MatchDay\MatchEventController::class, 'searchMatches'])->name('api.match-events.matches.search');
-Route::get('/api/match-officials/matches/search', [App\Http\Controllers\MatchDay\MatchOfficialController::class, 'searchMatches'])->name('api.match-officials.matches.search');
+    Route::get('/api/cards/matches/search', [App\Http\Controllers\MatchDay\CardController::class, 'searchMatches'])->name('api.cards.matches.search');
+    Route::get('/api/fouls/matches/search', [App\Http\Controllers\MatchDay\FoulController::class, 'searchMatches'])->name('api.fouls.matches.search');
+    Route::get('/api/shots/matches/search', [App\Http\Controllers\MatchDay\ShotController::class, 'searchMatches'])->name('api.shots.matches.search');
+    Route::get('/api/substitutions/matches/search', [App\Http\Controllers\MatchDay\SubstitutionController::class, 'searchMatches'])->name('api.substitutions.matches.search');
+    Route::get('/api/match-events/matches/search', [App\Http\Controllers\MatchDay\MatchEventController::class, 'searchMatches'])->name('api.match-events.matches.search');
+    Route::get('/api/match-officials/matches/search', [App\Http\Controllers\MatchDay\MatchOfficialController::class, 'searchMatches'])->name('api.match-officials.matches.search');
 
-Route::get('/api/injuries/matches/search', [App\Http\Controllers\Management\InjuryController::class, 'searchMatches'])->name('api.injuries.matches.search');
-Route::get('/api/injuries/players/search', [App\Http\Controllers\Management\InjuryController::class, 'searchPlayers'])->name('api.injuries.players.search');
+    Route::get('/api/injuries/matches/search', [App\Http\Controllers\Management\InjuryController::class, 'searchMatches'])->name('api.injuries.matches.search');
+    Route::get('/api/injuries/players/search', [App\Http\Controllers\Management\InjuryController::class, 'searchPlayers'])->name('api.injuries.players.search');
 
-Route::get('/api/squad-members/players/search', [App\Http\Controllers\Management\SquadMemberController::class, 'searchPlayers'])->name('api.squad-members.players.search');
+    Route::get('/api/squad-members/players/search', [App\Http\Controllers\Management\SquadMemberController::class, 'searchPlayers'])->name('api.squad-members.players.search');
 
-Route::get('/api/transfer-histories/players/search', [App\Http\Controllers\Management\TransferHistoryController::class, 'searchPlayers'])->name('api.transfers.players.search');
-Route::get('/api/transfer-histories/teams/search', [App\Http\Controllers\Management\TransferHistoryController::class, 'searchTeams'])->name('api.transfers.teams.search');
+    Route::get('/api/transfer-histories/players/search', [App\Http\Controllers\Management\TransferHistoryController::class, 'searchPlayers'])->name('api.transfers.players.search');
+    Route::get('/api/transfer-histories/teams/search', [App\Http\Controllers\Management\TransferHistoryController::class, 'searchTeams'])->name('api.transfers.teams.search');
 
-Route::get('/api/scouting-reports/players/search', [App\Http\Controllers\Management\ScoutingReportController::class, 'searchPlayers'])->name('api.scouting.players.search');
-Route::get('/api/scouting-reports/matches/search', [App\Http\Controllers\Management\ScoutingReportController::class, 'searchMatches'])->name('api.scouting.matches.search');
+    Route::get('/api/scouting-reports/players/search', [App\Http\Controllers\Management\ScoutingReportController::class, 'searchPlayers'])->name('api.scouting.players.search');
+    Route::get('/api/scouting-reports/matches/search', [App\Http\Controllers\Management\ScoutingReportController::class, 'searchMatches'])->name('api.scouting.matches.search');
 
-Route::get('/api/player-awards/players/search', [App\Http\Controllers\Stats\PlayerAwardController::class, 'searchPlayers'])->name('api.player-awards.players.search');
+    Route::get('/api/player-awards/players/search', [App\Http\Controllers\Stats\PlayerAwardController::class, 'searchPlayers'])->name('api.player-awards.players.search');
 
-Route::get('/api/player-season-stats/players/search', [App\Http\Controllers\Stats\PlayerSeasonStatController::class, 'searchPlayers'])->name('api.season-stats.players.search');
+    Route::get('/api/player-season-stats/players/search', [App\Http\Controllers\Stats\PlayerSeasonStatController::class, 'searchPlayers'])->name('api.season-stats.players.search');
 
-Route::get('/api/team-match-stats/matches/search', [App\Http\Controllers\Stats\TeamMatchStatController::class, 'searchMatches'])->name('api.team-match-stats.matches.search');
+    Route::get('/api/team-match-stats/matches/search', [App\Http\Controllers\Stats\TeamMatchStatController::class, 'searchMatches'])->name('api.team-match-stats.matches.search');
 
-// --- RUTAS ESPECÍFICAS PARA LINEUP PLAYER (Para evitar conflictos) ---
-Route::get('/api/lineup-players/specific/players', [LineupPlayerController::class, 'searchPlayers'])
-     ->name('api.lineup-players.specific.players');
+    Route::get('/api/lineup-players/specific/players', [LineupPlayerController::class, 'searchPlayers'])
+        ->name('api.lineup-players.specific.players');
 
-Route::get('/api/lineup-players/specific/lineups', [LineupPlayerController::class, 'searchLineups'])
-     ->name('api.lineup-players.specific.lineups');
+    Route::get('/api/lineup-players/specific/lineups', [LineupPlayerController::class, 'searchLineups'])
+        ->name('api.lineup-players.specific.lineups');
 
 
-Route::prefix('reports')->name('reports.')->group(function () {
-    Route::get('/', [ReportController::class, 'index'])->name('index');
-    Route::get('/{key}', [ReportController::class, 'show'])->name('show');
-    Route::get('/{key}/export', [ReportController::class, 'export'])->name('export');
-});
+    Route::prefix('reports')->name('reports.')->group(function () {
+        Route::get('/', [ReportController::class, 'index'])->name('index');
+        Route::get('/{key}', [ReportController::class, 'show'])->name('show');
+        Route::get('/{key}/export', [ReportController::class, 'export'])->name('export');
+    });
 });
