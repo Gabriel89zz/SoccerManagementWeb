@@ -19,20 +19,20 @@ class SquadStaffController extends Controller
         // BÚSQUEDA AJAX
         if ($request->filled('search')) {
             $search = $request->search;
-            $query->where(function($q) use ($search) {
+            $query->where(function ($q) use ($search) {
                 // Buscar por nombre del staff
-                $q->whereHas('staffMember', function($sq) use ($search) {
+                $q->whereHas('staffMember', function ($sq) use ($search) {
                     $sq->where('first_name', 'like', '%' . $search . '%')
-                      ->orWhere('last_name', 'like', '%' . $search . '%');
+                        ->orWhere('last_name', 'like', '%' . $search . '%');
                 })
-                // O por nombre del rol (Entrenador, Fisio, etc)
-                ->orWhereHas('staffMember.role', function($sq) use ($search) {
-                    $sq->where('name', 'like', '%' . $search . '%');
-                })
-                // O por nombre del equipo
-                ->orWhereHas('squad.team', function($sq) use ($search) {
-                    $sq->where('name', 'like', '%' . $search . '%');
-                });
+                    // O por nombre del rol (Entrenador, Fisio, etc)
+                    ->orWhereHas('staffMember.role', function ($sq) use ($search) {
+                        $sq->where('name', 'like', '%' . $search . '%');
+                    })
+                    // O por nombre del equipo
+                    ->orWhereHas('squad.team', function ($sq) use ($search) {
+                        $sq->where('name', 'like', '%' . $search . '%');
+                    });
             });
         }
 
@@ -47,16 +47,16 @@ class SquadStaffController extends Controller
     {
         // Cargar plantillas activas con contexto
         $squads = Squad::with(['team', 'season'])
-                       ->where('is_active', 1)
-                       ->get()
-                       ->sortByDesc('season.name');
+            ->where('is_active', 1)
+            ->get()
+            ->sortByDesc('season.name');
 
         // Cargar miembros del staff con su rol
         $staffMembers = StaffMember::with('role')
-                                   ->where('is_active', 1)
-                                   ->orderBy('last_name')
-                                   ->get();
-        
+            ->where('is_active', 1)
+            ->orderBy('last_name')
+            ->get();
+
         return view('management.squad_staff.create', compact('squads', 'staffMembers'));
     }
 
@@ -70,10 +70,9 @@ class SquadStaffController extends Controller
             'end_date' => 'nullable|date|after:start_date',
         ]);
 
-        // Validar duplicados: El mismo staff no debería estar dos veces en la misma plantilla en el mismo periodo (lógica simple por ahora)
         $exists = SquadStaff::where('squad_id', $request->squad_id)
-                            ->where('staff_member_id', $request->staff_member_id)
-                            ->exists();
+            ->where('staff_member_id', $request->staff_member_id)
+            ->exists();
 
         if ($exists) {
             return back()->withErrors(['msg' => 'This staff member is already assigned to this squad.'])->withInput();
@@ -94,16 +93,16 @@ class SquadStaffController extends Controller
     public function edit($id)
     {
         $squadStaff = SquadStaff::findOrFail($id);
-        
+
         $squads = Squad::with(['team', 'season'])
-                       ->where('is_active', 1)
-                       ->get()
-                       ->sortByDesc('season.name');
+            ->where('is_active', 1)
+            ->get()
+            ->sortByDesc('season.name');
 
         $staffMembers = StaffMember::with('role')
-                                   ->where('is_active', 1)
-                                   ->orderBy('last_name')
-                                   ->get();
+            ->where('is_active', 1)
+            ->orderBy('last_name')
+            ->get();
 
         return view('management.squad_staff.edit', compact('squadStaff', 'squads', 'staffMembers'));
     }
@@ -118,11 +117,10 @@ class SquadStaffController extends Controller
             'end_date' => 'nullable|date|after:start_date',
         ]);
 
-        // Validar duplicados excluyendo actual
         $exists = SquadStaff::where('squad_id', $request->squad_id)
-                            ->where('staff_member_id', $request->staff_member_id)
-                            ->where('squad_staff_id', '!=', $id)
-                            ->exists();
+            ->where('staff_member_id', $request->staff_member_id)
+            ->where('squad_staff_id', '!=', $id)
+            ->exists();
 
         if ($exists) {
             return back()->withErrors(['msg' => 'This staff member is already assigned to this squad.'])->withInput();

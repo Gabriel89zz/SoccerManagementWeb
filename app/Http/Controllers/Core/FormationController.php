@@ -60,7 +60,7 @@ class FormationController extends Controller
     public function update(Request $request, $id)
     {
         $validated = $request->validate([
-            'name' => 'required|max:50|unique:formation,name,'.$id.',formation_id',
+            'name' => 'required|max:50|unique:formation,name,' . $id . ',formation_id',
         ]);
 
         $formation = Formation::findOrFail($id);

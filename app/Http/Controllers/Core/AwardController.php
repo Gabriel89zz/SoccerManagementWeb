@@ -15,9 +15,9 @@ class AwardController extends Controller
 
         if ($request->filled('search')) {
             $search = $request->search;
-            $query->where(function($q) use ($search) {
+            $query->where(function ($q) use ($search) {
                 $q->where('name', 'like', '%' . $search . '%')
-                  ->orWhere('scope', 'like', '%' . $search . '%');
+                    ->orWhere('scope', 'like', '%' . $search . '%');
             });
         }
 
@@ -45,7 +45,7 @@ class AwardController extends Controller
         return redirect()->route('awards.index')->with('success', 'Award created successfully.');
     }
 
-    // 4. SHOW DETAIL (NUEVO)
+    // 4. SHOW DETAIL
     public function show($id)
     {
         $award = Award::findOrFail($id);
@@ -63,7 +63,7 @@ class AwardController extends Controller
     public function update(Request $request, $id)
     {
         $validated = $request->validate([
-            'name' => 'required|max:100|unique:award,name,'.$id.',award_id',
+            'name' => 'required|max:100|unique:award,name,' . $id . ',award_id',
             'scope' => 'required|max:50',
         ]);
 

@@ -12,7 +12,6 @@ class SocialMediaPlatformController extends Controller
     public function index()
     {
         $platforms = SocialMediaPlatform::orderBy('name')->paginate(15);
-        // OJO: Ajustado a snake_case para coincidir con tu carpeta de vistas
         return view('core.social_media_platforms.index', compact('platforms'));
     }
 
@@ -33,7 +32,7 @@ class SocialMediaPlatformController extends Controller
         return redirect()->route('social-media-platforms.index')->with('success', 'Platform created successfully.');
     }
 
-    // SHOW DETAILS (NUEVO MÉTODO)
+    // SHOW DETAILS 
     public function show($id)
     {
         $platform = SocialMediaPlatform::findOrFail($id);
@@ -51,7 +50,7 @@ class SocialMediaPlatformController extends Controller
     public function update(Request $request, $id)
     {
         $validated = $request->validate([
-            'name' => 'required|max:100|unique:social_media_platform,name,'.$id.',social_media_platform_id',
+            'name' => 'required|max:100|unique:social_media_platform,name,' . $id . ',social_media_platform_id',
         ]);
 
         $platform = SocialMediaPlatform::findOrFail($id);

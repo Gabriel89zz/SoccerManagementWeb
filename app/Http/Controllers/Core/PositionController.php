@@ -24,7 +24,7 @@ class PositionController extends Controller
         $validated = $request->validate([
             'name' => 'required|max:50|unique:position,name',
             'acronym' => 'required|max:5|unique:position,acronym',
-            'category' => 'required|max:20', // Goalkeeper, Defender, etc.
+            'category' => 'required|max:20',
         ]);
 
         Position::create($validated);
@@ -47,8 +47,8 @@ class PositionController extends Controller
     public function update(Request $request, $id)
     {
         $validated = $request->validate([
-            'name' => 'required|max:50|unique:position,name,'.$id.',position_id',
-            'acronym' => 'required|max:5|unique:position,acronym,'.$id.',position_id',
+            'name' => 'required|max:50|unique:position,name,' . $id . ',position_id',
+            'acronym' => 'required|max:5|unique:position,acronym,' . $id . ',position_id',
             'category' => 'required|max:20',
         ]);
 

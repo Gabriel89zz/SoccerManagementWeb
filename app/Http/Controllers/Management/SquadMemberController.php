@@ -17,15 +17,15 @@ class SquadMemberController extends Controller
 
         if ($request->filled('search')) {
             $search = $request->search;
-            $query->where(function($q) use ($search) {
-                $q->whereHas('player', function($sq) use ($search) {
+            $query->where(function ($q) use ($search) {
+                $q->whereHas('player', function ($sq) use ($search) {
                     $sq->where('first_name', 'like', '%' . $search . '%')
-                      ->orWhere('last_name', 'like', '%' . $search . '%');
+                        ->orWhere('last_name', 'like', '%' . $search . '%');
                 })
-                ->orWhereHas('squad.team', function($sq) use ($search) {
-                    $sq->where('name', 'like', '%' . $search . '%');
-                })
-                ->orWhere('jersey_number', 'like', '%' . $search . '%');
+                    ->orWhereHas('squad.team', function ($sq) use ($search) {
+                        $sq->where('name', 'like', '%' . $search . '%');
+                    })
+                    ->orWhere('jersey_number', 'like', '%' . $search . '%');
             });
         }
 
@@ -35,17 +35,17 @@ class SquadMemberController extends Controller
         return view('management.squad_members.index', compact('members'));
     }
 
-    // 2. CREATE FORM (OPTIMIZADO)
+    // 2. CREATE FORM
     public function create()
     {
         // Cargar plantillas activas
         $squads = Squad::with(['team', 'season'])
-                       ->where('is_active', 1)
-                       ->get()
-                       ->sortByDesc('season.name');
+            ->where('is_active', 1)
+            ->get()
+            ->sortByDesc('season.name');
 
         // YA NO cargamos $players masivamente. Se usarán vía AJAX.
-        
+
         return view('management.squad_members.create', compact('squads'));
     }
 
@@ -62,8 +62,8 @@ class SquadMemberController extends Controller
 
         // Validar duplicados
         $exists = SquadMember::where('squad_id', $request->squad_id)
-                             ->where('player_id', $request->player_id)
-                             ->exists();
+            ->where('player_id', $request->player_id)
+            ->exists();
 
         if ($exists) {
             return back()->withErrors(['msg' => 'This player is already assigned to this squad.'])->withInput();
@@ -72,8 +72,8 @@ class SquadMemberController extends Controller
         // Validar dorsal duplicado
         if ($request->filled('jersey_number')) {
             $jerseyExists = SquadMember::where('squad_id', $request->squad_id)
-                                       ->where('jersey_number', $request->jersey_number)
-                                       ->exists();
+                ->where('jersey_number', $request->jersey_number)
+                ->exists();
             if ($jerseyExists) {
                 return back()->withErrors(['msg' => 'Jersey number already taken in this squad.'])->withInput();
             }
@@ -90,16 +90,16 @@ class SquadMemberController extends Controller
         return view('management.squad_members.show', compact('member'));
     }
 
-    // 5. EDIT FORM (OPTIMIZADO)
+    // 5. EDIT FORM
     public function edit($id)
     {
         // Cargamos la relación 'player' para pre-llenar el input en la vista
         $member = SquadMember::with('player')->findOrFail($id);
-        
+
         $squads = Squad::with(['team', 'season'])
-                       ->where('is_active', 1)
-                       ->get()
-                       ->sortByDesc('season.name');
+            ->where('is_active', 1)
+            ->get()
+            ->sortByDesc('season.name');
 
         // YA NO cargamos la lista masiva de jugadores
         return view('management.squad_members.edit', compact('member', 'squads'));
@@ -117,9 +117,9 @@ class SquadMemberController extends Controller
         ]);
 
         $exists = SquadMember::where('squad_id', $request->squad_id)
-                             ->where('player_id', $request->player_id)
-                             ->where('squad_member_id', '!=', $id)
-                             ->exists();
+            ->where('player_id', $request->player_id)
+            ->where('squad_member_id', '!=', $id)
+            ->exists();
 
         if ($exists) {
             return back()->withErrors(['msg' => 'This player is already assigned to this squad.'])->withInput();
@@ -139,7 +139,7 @@ class SquadMemberController extends Controller
         return redirect()->route('squad-members.index')->with('success', 'Player removed from squad successfully.');
     }
 
-    // 8. AJAX JUGADORES (NUEVO MÉTODO)
+    // 8. AJAX JUGADORES
     public function searchPlayers(Request $request)
     {
         $term = $request->get('q');
@@ -149,16 +149,16 @@ class SquadMemberController extends Controller
         }
 
         $players = Player::where('is_active', 1)
-                         ->where(function($query) use ($term) {
-                             $query->where('first_name', 'like', '%' . $term . '%')
-                                   ->orWhere('last_name', 'like', '%' . $term . '%');
-                         })
-                         ->with('country')
-                         ->orderBy('last_name')
-                         ->limit(20)
-                         ->get();
+            ->where(function ($query) use ($term) {
+                $query->where('first_name', 'like', '%' . $term . '%')
+                    ->orWhere('last_name', 'like', '%' . $term . '%');
+            })
+            ->with('country')
+            ->orderBy('last_name')
+            ->limit(20)
+            ->get();
 
-        $results = $players->map(function($player) {
+        $results = $players->map(function ($player) {
             return [
                 'id' => $player->player_id,
                 'text' => $player->full_name . ' (' . ($player->country->name ?? 'N/A') . ')',

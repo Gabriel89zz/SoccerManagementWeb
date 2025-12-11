@@ -17,17 +17,17 @@ class TransferHistoryController extends Controller
 
         if ($request->filled('search')) {
             $search = $request->search;
-            $query->where(function($q) use ($search) {
-                $q->whereHas('player', function($sq) use ($search) {
+            $query->where(function ($q) use ($search) {
+                $q->whereHas('player', function ($sq) use ($search) {
                     $sq->where('first_name', 'like', '%' . $search . '%')
-                      ->orWhere('last_name', 'like', '%' . $search . '%');
+                        ->orWhere('last_name', 'like', '%' . $search . '%');
                 })
-                ->orWhereHas('fromTeam', function($sq) use ($search) {
-                    $sq->where('name', 'like', '%' . $search . '%');
-                })
-                ->orWhereHas('toTeam', function($sq) use ($search) {
-                    $sq->where('name', 'like', '%' . $search . '%');
-                });
+                    ->orWhereHas('fromTeam', function ($sq) use ($search) {
+                        $sq->where('name', 'like', '%' . $search . '%');
+                    })
+                    ->orWhereHas('toTeam', function ($sq) use ($search) {
+                        $sq->where('name', 'like', '%' . $search . '%');
+                    });
             });
         }
 
@@ -37,10 +37,9 @@ class TransferHistoryController extends Controller
         return view('management.transfer_histories.index', compact('transfers'));
     }
 
-    // 2. CREATE FORM (OPTIMIZADO)
+    // 2. CREATE FORM
     public function create()
     {
-        // YA NO cargamos players ni teams masivamente. Se cargarán por AJAX.
         return view('management.transfer_histories.create');
     }
 
@@ -67,12 +66,11 @@ class TransferHistoryController extends Controller
         return view('management.transfer_histories.show', compact('transfer'));
     }
 
-    // 5. EDIT FORM (OPTIMIZADO)
+    // 5. EDIT FORM
     public function edit($id)
     {
-        // Cargamos relaciones para pre-llenar los inputs AJAX
         $transfer = TransferHistory::with(['player', 'fromTeam', 'toTeam'])->findOrFail($id);
-        
+
         return view('management.transfer_histories.edit', compact('transfer'));
     }
 
@@ -102,23 +100,23 @@ class TransferHistoryController extends Controller
         return redirect()->route('transfer-histories.index')->with('success', 'Transfer deleted successfully.');
     }
 
-    // 8. AJAX JUGADORES
     public function searchPlayers(Request $request)
     {
         $term = $request->get('q');
-        if (empty($term)) return response()->json(['results' => []]);
+        if (empty($term))
+            return response()->json(['results' => []]);
 
         $players = Player::where('is_active', 1)
-                         ->where(function($query) use ($term) {
-                             $query->where('first_name', 'like', '%' . $term . '%')
-                                   ->orWhere('last_name', 'like', '%' . $term . '%');
-                         })
-                         ->with('country')
-                         ->orderBy('last_name')
-                         ->limit(20)
-                         ->get();
+            ->where(function ($query) use ($term) {
+                $query->where('first_name', 'like', '%' . $term . '%')
+                    ->orWhere('last_name', 'like', '%' . $term . '%');
+            })
+            ->with('country')
+            ->orderBy('last_name')
+            ->limit(20)
+            ->get();
 
-        $results = $players->map(function($player) {
+        $results = $players->map(function ($player) {
             return [
                 'id' => $player->player_id,
                 'text' => $player->full_name . ' (' . ($player->country->name ?? 'N/A') . ')',
@@ -131,19 +129,19 @@ class TransferHistoryController extends Controller
         return response()->json(['results' => $results]);
     }
 
-    // 9. AJAX EQUIPOS
     public function searchTeams(Request $request)
     {
         $term = $request->get('q');
-        if (empty($term)) return response()->json(['results' => []]);
+        if (empty($term))
+            return response()->json(['results' => []]);
 
         $teams = Team::where('is_active', 1)
-                     ->where('name', 'like', '%' . $term . '%')
-                     ->orderBy('name')
-                     ->limit(20)
-                     ->get();
+            ->where('name', 'like', '%' . $term . '%')
+            ->orderBy('name')
+            ->limit(20)
+            ->get();
 
-        $results = $teams->map(function($team) {
+        $results = $teams->map(function ($team) {
             return [
                 'id' => $team->team_id,
                 'text' => $team->name

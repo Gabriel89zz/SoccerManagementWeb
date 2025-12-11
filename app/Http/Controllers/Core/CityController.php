@@ -18,12 +18,12 @@ class CityController extends Controller
         // BÚSQUEDA AJAX EN SERVIDOR
         if ($request->filled('search')) {
             $search = $request->search;
-            $query->where(function($q) use ($search) {
+            $query->where(function ($q) use ($search) {
                 $q->where('name', 'like', '%' . $search . '%')
-                  // Buscamos también dentro de la relación 'country'
-                  ->orWhereHas('country', function($sq) use ($search) {
-                      $sq->where('name', 'like', '%' . $search . '%');
-                  });
+                    // Buscamos también dentro de la relación 'country'
+                    ->orWhereHas('country', function ($sq) use ($search) {
+                        $sq->where('name', 'like', '%' . $search . '%');
+                    });
             });
         }
 
@@ -52,11 +52,8 @@ class CityController extends Controller
         return redirect()->route('cities.index')->with('success', 'City created successfully.');
     }
 
-    // SHOW DETAILS (NUEVO MÉTODO AGREGADO)
     public function show($id)
     {
-        // Usamos findOrFail para lanzar error 404 si no existe
-        // Cargamos la relación 'country' para mostrar el nombre del país
         $city = City::with('country')->findOrFail($id);
         return view('core.cities.show', compact('city'));
     }
@@ -92,22 +89,21 @@ class CityController extends Controller
     }
 
 
-     // MÉTODO NUEVO PARA SELECT2 AJAX
     public function search(Request $request)
     {
-        $term = $request->get('q'); // Select2 envía el término de búsqueda como 'q'
+        $term = $request->get('q');
 
         if (empty($term)) {
             return response()->json(['results' => []]);
         }
 
         $cities = City::where('name', 'like', '%' . $term . '%')
-                      ->with('country') // Traemos el país para mostrarlo
-                      ->limit(20)       // Límite para no saturar
-                      ->get();
+            ->with('country') // Traemos el país para mostrarlo
+            ->limit(20)       // Límite para no saturar
+            ->get();
 
         // Formateamos para Select2
-        $results = $cities->map(function($city) {
+        $results = $cities->map(function ($city) {
             return [
                 'id' => $city->city_id,
                 'text' => $city->name . ' (' . ($city->country->name ?? 'N/A') . ')'

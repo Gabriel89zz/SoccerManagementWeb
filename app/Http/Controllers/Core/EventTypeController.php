@@ -60,7 +60,7 @@ class EventTypeController extends Controller
     public function update(Request $request, $id)
     {
         $validated = $request->validate([
-            'name' => 'required|max:50|unique:event_type,name,'.$id.',event_type_id',
+            'name' => 'required|max:50|unique:event_type,name,' . $id . ',event_type_id',
         ]);
 
         $eventType = EventType::findOrFail($id);

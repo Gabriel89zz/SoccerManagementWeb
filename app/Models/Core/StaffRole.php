@@ -10,7 +10,7 @@ class StaffRole extends BaseModel
     protected $primaryKey = 'role_id';
 
     protected $fillable = [
-        'role_name', // En tu BD es 'role_name'
+        'role_name',
         'created_by', 'updated_by', 'deleted_by', 'is_active'
     ];
 }

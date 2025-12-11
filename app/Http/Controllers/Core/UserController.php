@@ -23,11 +23,11 @@ class UserController extends Controller
         // BÚSQUEDA AJAX
         if ($request->filled('search')) {
             $search = $request->search;
-            $query->where(function($q) use ($search) {
+            $query->where(function ($q) use ($search) {
                 $q->where('first_name', 'like', '%' . $search . '%')
-                  ->orWhere('last_name', 'like', '%' . $search . '%')
-                  ->orWhere('email', 'like', '%' . $search . '%')
-                  ->orWhere('username', 'like', '%' . $search . '%');
+                    ->orWhere('last_name', 'like', '%' . $search . '%')
+                    ->orWhere('email', 'like', '%' . $search . '%')
+                    ->orWhere('username', 'like', '%' . $search . '%');
             });
         }
 
@@ -40,14 +40,16 @@ class UserController extends Controller
     // CREATE FORM
     public function create()
     {
-        if (!Auth::user()->isAdmin()) return redirect()->route('dashboard');
+        if (!Auth::user()->isAdmin())
+            return redirect()->route('dashboard');
         return view('core.users.create');
     }
 
     // STORE
     public function store(Request $request)
     {
-        if (!Auth::user()->isAdmin()) return redirect()->route('dashboard');
+        if (!Auth::user()->isAdmin())
+            return redirect()->route('dashboard');
 
         $validated = $request->validate([
             'first_name' => 'required|max:50',
@@ -76,19 +78,21 @@ class UserController extends Controller
     // SHOW DETAIL (AUDITORÍA)
     public function show($id)
     {
-        if (!Auth::user()->isAdmin()) return redirect()->route('dashboard');
-        
+        if (!Auth::user()->isAdmin())
+            return redirect()->route('dashboard');
+
         // Cargar quien creó/editó al usuario (Self Join)
         // Necesitamos definir estas relaciones en el Modelo User primero (ver abajo)
-        $user = User::findOrFail($id); 
-        
+        $user = User::findOrFail($id);
+
         return view('core.users.show', compact('user'));
     }
 
     // EDIT FORM
     public function edit($id)
     {
-        if (!Auth::user()->isAdmin()) return redirect()->route('dashboard');
+        if (!Auth::user()->isAdmin())
+            return redirect()->route('dashboard');
         $user = User::findOrFail($id);
         return view('core.users.edit', compact('user'));
     }
@@ -96,17 +100,18 @@ class UserController extends Controller
     // UPDATE
     public function update(Request $request, $id)
     {
-        if (!Auth::user()->isAdmin()) return redirect()->route('dashboard');
+        if (!Auth::user()->isAdmin())
+            return redirect()->route('dashboard');
 
         $user = User::findOrFail($id);
 
         $validated = $request->validate([
             'first_name' => 'required|max:50',
             'last_name' => 'required|max:50',
-            'username' => 'required|max:50|unique:user,username,'.$id.',user_id',
-            'email' => 'required|email|max:100|unique:user,email,'.$id.',user_id',
+            'username' => 'required|max:50|unique:user,username,' . $id . ',user_id',
+            'email' => 'required|email|max:100|unique:user,email,' . $id . ',user_id',
             'role' => 'required|in:Administrador,Usuario',
-            'password' => 'nullable|min:8|confirmed', // Opcional al editar
+            'password' => 'nullable|min:8|confirmed',
         ]);
 
         $user->first_name = $request->first_name;
@@ -115,7 +120,7 @@ class UserController extends Controller
         $user->email = $request->email;
         $user->role = $request->role;
         $user->is_staff = ($request->role === 'Administrador');
-        
+
         if ($request->filled('password')) {
             $user->password = $request->password;
         }
@@ -129,10 +134,11 @@ class UserController extends Controller
     // DELETE
     public function destroy($id)
     {
-        if (!Auth::user()->isAdmin()) return redirect()->route('dashboard');
-        
+        if (!Auth::user()->isAdmin())
+            return redirect()->route('dashboard');
+
         $user = User::findOrFail($id);
-        
+
         // Evitar auto-borrado
         if ($user->user_id === Auth::id()) {
             return back()->with('error', 'You cannot delete yourself.');

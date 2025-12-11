@@ -19,16 +19,16 @@ class SquadCoachController extends Controller
         // BÚSQUEDA AJAX
         if ($request->filled('search')) {
             $search = $request->search;
-            $query->where(function($q) use ($search) {
+            $query->where(function ($q) use ($search) {
                 // Buscar por nombre del entrenador
-                $q->whereHas('coach', function($sq) use ($search) {
+                $q->whereHas('coach', function ($sq) use ($search) {
                     $sq->where('first_name', 'like', '%' . $search . '%')
-                      ->orWhere('last_name', 'like', '%' . $search . '%');
+                        ->orWhere('last_name', 'like', '%' . $search . '%');
                 })
-                // O por nombre del equipo
-                ->orWhereHas('squad.team', function($sq) use ($search) {
-                    $sq->where('name', 'like', '%' . $search . '%');
-                });
+                    // O por nombre del equipo
+                    ->orWhereHas('squad.team', function ($sq) use ($search) {
+                        $sq->where('name', 'like', '%' . $search . '%');
+                    });
             });
         }
 
@@ -41,17 +41,16 @@ class SquadCoachController extends Controller
     // 2. CREATE FORM
     public function create()
     {
-        // Cargar plantillas activas con contexto
         $squads = Squad::with(['team', 'season'])
-                       ->where('is_active', 1)
-                       ->get()
-                       ->sortByDesc('season.name');
+            ->where('is_active', 1)
+            ->get()
+            ->sortByDesc('season.name');
 
         // Cargar entrenadores activos
         $coaches = Coach::where('is_active', 1)
-                        ->orderBy('last_name')
-                        ->get();
-        
+            ->orderBy('last_name')
+            ->get();
+
         return view('management.squad_coaches.create', compact('squads', 'coaches'));
     }
 
@@ -67,8 +66,8 @@ class SquadCoachController extends Controller
 
         // Validar duplicados
         $exists = SquadCoach::where('squad_id', $request->squad_id)
-                            ->where('coach_id', $request->coach_id)
-                            ->exists();
+            ->where('coach_id', $request->coach_id)
+            ->exists();
 
         if ($exists) {
             return back()->withErrors(['msg' => 'This coach is already assigned to this squad.'])->withInput();
@@ -89,15 +88,15 @@ class SquadCoachController extends Controller
     public function edit($id)
     {
         $squadCoach = SquadCoach::findOrFail($id);
-        
+
         $squads = Squad::with(['team', 'season'])
-                       ->where('is_active', 1)
-                       ->get()
-                       ->sortByDesc('season.name');
+            ->where('is_active', 1)
+            ->get()
+            ->sortByDesc('season.name');
 
         $coaches = Coach::where('is_active', 1)
-                        ->orderBy('last_name')
-                        ->get();
+            ->orderBy('last_name')
+            ->get();
 
         return view('management.squad_coaches.edit', compact('squadCoach', 'squads', 'coaches'));
     }
@@ -112,11 +111,10 @@ class SquadCoachController extends Controller
             'end_date' => 'nullable|date|after:start_date',
         ]);
 
-        // Validar duplicados excluyendo actual
         $exists = SquadCoach::where('squad_id', $request->squad_id)
-                            ->where('coach_id', $request->coach_id)
-                            ->where('squad_coach_id', '!=', $id)
-                            ->exists();
+            ->where('coach_id', $request->coach_id)
+            ->where('squad_coach_id', '!=', $id)
+            ->exists();
 
         if ($exists) {
             return back()->withErrors(['msg' => 'This coach is already assigned to this squad.'])->withInput();

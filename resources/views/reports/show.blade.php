@@ -44,7 +44,7 @@
                     <thead class="bg-dark text-white">
                         <tr>
                             @foreach($columns as $col)
-                                <th class="text-uppercase py-3" style="font-size: 0.8rem; letter-spacing: 0.5px;">
+                                <th class="text-uppercase py-3 text-nowrap" style="font-size: 0.8rem; letter-spacing: 0.5px;">
                                     {{ str_replace('_', ' ', $col) }}
                                 </th>
                             @endforeach
@@ -54,8 +54,29 @@
                         @forelse($data as $row)
                             <tr>
                                 @foreach($columns as $col)
-                                    <td class="py-3">
-                                        {{ $row->$col }}
+                                    <td class="py-3 text-nowrap">
+                                        {{-- LÓGICA DE FORMATO INTELIGENTE --}}
+                                        @php
+                                            $value = $row->$col;
+                                            $colLower = strtolower($col);
+                                            // Palabras clave para detectar dinero
+                                            $isMoney = \Illuminate\Support\Str::contains($colLower, ['money', 'cost', 'value', 'fee', 'balance', 'spending', 'income', 'eur', 'usd', 'budget']);
+                                            // Palabras clave para detectar balances (rojo/verde)
+                                            $isBalance = \Illuminate\Support\Str::contains($colLower, ['balance', 'profit', 'net']);
+                                        @endphp
+
+                                        @if($isMoney && is_numeric($value))
+                                            {{-- Formato de Moneda --}}
+                                            <span class="@if($isBalance) {{ $value < 0 ? 'text-danger fw-bold' : 'text-success fw-bold' }} @endif">
+                                                {{ $value < 0 ? '-' : '' }}€ {{ number_format(abs($value), 2) }}
+                                            </span>
+                                        @elseif(is_numeric($value) && strpos($value, '.') !== false) 
+                                            {{-- Formato Decimal Genérico (si no es dinero pero tiene decimales) --}}
+                                            {{ number_format($value, 2) }}
+                                        @else
+                                            {{-- Texto Normal --}}
+                                            {{ $value }}
+                                        @endif
                                     </td>
                                 @endforeach
                             </tr>

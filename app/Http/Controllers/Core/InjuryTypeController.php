@@ -16,9 +16,9 @@ class InjuryTypeController extends Controller
         // BÚSQUEDA AJAX EN SERVIDOR
         if ($request->filled('search')) {
             $search = $request->search;
-            $query->where(function($q) use ($search) {
+            $query->where(function ($q) use ($search) {
                 $q->where('name', 'like', '%' . $search . '%')
-                  ->orWhere('severity_level', 'like', '%' . $search . '%');
+                    ->orWhere('severity_level', 'like', '%' . $search . '%');
             });
         }
 
@@ -39,7 +39,7 @@ class InjuryTypeController extends Controller
     {
         $validated = $request->validate([
             'name' => 'required|max:100|unique:injury_type,name',
-            'severity_level' => 'required|max:20', // Low, Medium, High, etc.
+            'severity_level' => 'required|max:20',
         ]);
 
         InjuryType::create($validated);
@@ -64,8 +64,7 @@ class InjuryTypeController extends Controller
     public function update(Request $request, $id)
     {
         $validated = $request->validate([
-            // Validación unique ignorando el ID actual. PK: injury_type_id
-            'name' => 'required|max:100|unique:injury_type,name,'.$id.',injury_type_id',
+            'name' => 'required|max:100|unique:injury_type,name,' . $id . ',injury_type_id',
             'severity_level' => 'required|max:20',
         ]);
 

@@ -19,15 +19,15 @@ class SquadController extends Controller
         // BÚSQUEDA AJAX
         if ($request->filled('search')) {
             $search = $request->search;
-            $query->where(function($q) use ($search) {
+            $query->where(function ($q) use ($search) {
                 // Buscar por nombre del equipo
-                $q->whereHas('team', function($sq) use ($search) {
+                $q->whereHas('team', function ($sq) use ($search) {
                     $sq->where('name', 'like', '%' . $search . '%');
                 })
-                // O por nombre de la temporada
-                ->orWhereHas('season', function($sq) use ($search) {
-                    $sq->where('name', 'like', '%' . $search . '%');
-                });
+                    // O por nombre de la temporada
+                    ->orWhereHas('season', function ($sq) use ($search) {
+                        $sq->where('name', 'like', '%' . $search . '%');
+                    });
             });
         }
 
@@ -44,7 +44,7 @@ class SquadController extends Controller
         $teams = Team::where('is_active', 1)->orderBy('name')->get();
         // Ordenar temporadas por nombre descendente (más recientes primero)
         $seasons = Season::where('is_active', 1)->orderBy('name', 'desc')->get();
-        
+
         return view('management.squads.create', compact('teams', 'seasons'));
     }
 
@@ -58,8 +58,8 @@ class SquadController extends Controller
 
         // Validar duplicados: Un equipo solo debe tener una plantilla por temporada
         $exists = Squad::where('team_id', $request->team_id)
-                       ->where('season_id', $request->season_id)
-                       ->exists();
+            ->where('season_id', $request->season_id)
+            ->exists();
 
         if ($exists) {
             return back()->withErrors(['msg' => 'A squad for this team and season already exists.'])->withInput();
@@ -80,7 +80,7 @@ class SquadController extends Controller
     public function edit($id)
     {
         $squad = Squad::findOrFail($id);
-        
+
         $teams = Team::where('is_active', 1)->orderBy('name')->get();
         $seasons = Season::where('is_active', 1)->orderBy('name', 'desc')->get();
 
@@ -97,9 +97,9 @@ class SquadController extends Controller
 
         // Validar duplicados excluyendo el actual
         $exists = Squad::where('team_id', $request->team_id)
-                       ->where('season_id', $request->season_id)
-                       ->where('squad_id', '!=', $id)
-                       ->exists();
+            ->where('season_id', $request->season_id)
+            ->where('squad_id', '!=', $id)
+            ->exists();
 
         if ($exists) {
             return back()->withErrors(['msg' => 'A squad for this team and season already exists.'])->withInput();

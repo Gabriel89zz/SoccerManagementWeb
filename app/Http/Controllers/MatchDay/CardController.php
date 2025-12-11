@@ -18,15 +18,15 @@ class CardController extends Controller
 
         if ($request->filled('search')) {
             $search = $request->search;
-            $query->where(function($q) use ($search) {
-                $q->whereHas('player', function($sq) use ($search) {
+            $query->where(function ($q) use ($search) {
+                $q->whereHas('player', function ($sq) use ($search) {
                     $sq->where('first_name', 'like', '%' . $search . '%')
-                      ->orWhere('last_name', 'like', '%' . $search . '%');
+                        ->orWhere('last_name', 'like', '%' . $search . '%');
                 })
-                ->orWhereHas('team', function($sq) use ($search) {
-                    $sq->where('name', 'like', '%' . $search . '%');
-                })
-                ->orWhere('card_type', 'like', '%' . $search . '%');
+                    ->orWhereHas('team', function ($sq) use ($search) {
+                        $sq->where('name', 'like', '%' . $search . '%');
+                    })
+                    ->orWhere('card_type', 'like', '%' . $search . '%');
             });
         }
 
@@ -36,10 +36,9 @@ class CardController extends Controller
         return view('match_day.cards.index', compact('cards'));
     }
 
-    // 2. CREATE FORM (OPTIMIZADO)
+    // 2. CREATE FORM
     public function create()
     {
-        // YA NO cargamos $matches masivamente. Se cargarán por AJAX.
         $teams = Team::where('is_active', 1)->orderBy('name')->get();
         return view('match_day.cards.create', compact('teams'));
     }
@@ -67,12 +66,12 @@ class CardController extends Controller
         return view('match_day.cards.show', compact('card'));
     }
 
-    // 5. EDIT FORM (OPTIMIZADO)
+    // 5. EDIT FORM
     public function edit($id)
     {
         // Cargar contexto del partido para pre-llenar el select
         $card = Card::with(['player', 'match.homeTeam', 'match.awayTeam'])->findOrFail($id);
-        
+
         // YA NO cargamos la lista gigante de partidos
         $teams = Team::where('is_active', 1)->orderBy('name')->get();
 
@@ -105,23 +104,24 @@ class CardController extends Controller
         return redirect()->route('cards.index')->with('success', 'Card deleted successfully.');
     }
 
-    // 8. AJAX JUGADORES (Existente)
+    // 8. AJAX JUGADORES
     public function searchPlayers(Request $request)
     {
         $term = $request->get('q');
-        if (empty($term)) return response()->json(['results' => []]);
+        if (empty($term))
+            return response()->json(['results' => []]);
 
         $players = Player::where('is_active', 1)
-                         ->where(function($query) use ($term) {
-                             $query->where('first_name', 'like', '%' . $term . '%')
-                                   ->orWhere('last_name', 'like', '%' . $term . '%');
-                         })
-                         ->with('country')
-                         ->orderBy('last_name')
-                         ->limit(20)
-                         ->get();
+            ->where(function ($query) use ($term) {
+                $query->where('first_name', 'like', '%' . $term . '%')
+                    ->orWhere('last_name', 'like', '%' . $term . '%');
+            })
+            ->with('country')
+            ->orderBy('last_name')
+            ->limit(20)
+            ->get();
 
-        $results = $players->map(function($player) {
+        $results = $players->map(function ($player) {
             return [
                 'id' => $player->player_id,
                 'text' => $player->full_name . ' (' . ($player->country->name ?? 'N/A') . ')',
@@ -134,7 +134,7 @@ class CardController extends Controller
         return response()->json(['results' => $results]);
     }
 
-    // 9. AJAX PARTIDOS (NUEVO MÉTODO)
+    // 9. AJAX PARTIDOS
     public function searchMatches(Request $request)
     {
         $term = $request->get('q');
@@ -144,19 +144,19 @@ class CardController extends Controller
         }
 
         $matches = MatchGame::with(['homeTeam', 'awayTeam'])
-            ->where(function($query) use ($term) {
-                $query->whereHas('homeTeam', function($q) use ($term) {
+            ->where(function ($query) use ($term) {
+                $query->whereHas('homeTeam', function ($q) use ($term) {
                     $q->where('name', 'like', '%' . $term . '%');
                 })
-                ->orWhereHas('awayTeam', function($q) use ($term) {
-                    $q->where('name', 'like', '%' . $term . '%');
-                });
+                    ->orWhereHas('awayTeam', function ($q) use ($term) {
+                        $q->where('name', 'like', '%' . $term . '%');
+                    });
             })
             ->orderBy('match_date', 'desc')
             ->limit(20)
             ->get();
 
-        $results = $matches->map(function($m) {
+        $results = $matches->map(function ($m) {
             return [
                 'id' => $m->match_id,
                 'text' => ($m->homeTeam->name ?? '?') . ' vs ' . ($m->awayTeam->name ?? '?') . ' (' . ($m->match_date ? $m->match_date->format('d/m/Y') : 'TBD') . ')'
